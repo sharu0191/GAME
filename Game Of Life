@@ -1,0 +1,200 @@
+package game;
+//To take inputs from user scanner class imported
+import java.util.Scanner;
+
+public final class GameOfLife {
+	//Value representation of a dead cell
+	public final static int DEAD=0x00;
+	//value representation of a live cell
+	public final static int LIVE=0x01;
+	
+	/*
+	 * Starting game with method
+	 */
+	public final static void main(String[] args) {
+		//test the implementation of game
+		GameOfLife gof=new GameOfLife();
+		Scanner sc= new Scanner (System.in);
+		System.out.println("Enter number of iterations you want to perform");
+		int num=sc.nextInt();
+		gof.test(num);	
+	}
+	/*
+	Testing game implementation, changing array
+	@parameter itr the number of times iteration should be played
+	*/
+	private void test(int itr){
+		int[][] board={
+				      { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0 },
+	            { 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0 },
+	            { 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
+	            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+	            };
+		System.out.println("===========Original Generartion===========");
+		printBoard(board);
+		System.out.println("==========================================");
+		
+		for (int i=1; i<=itr; i++){
+			System.out.println();
+			board=getNextBoard(board);
+			System.out.println("==============Generation: "+i+"===============");
+			printBoard(board);
+			System.out.println("==========================================");
+			getCellState(board);
+		}
+		
+	}
+	/*
+	 * print the board field to ststem.out
+	 * @param board The board to be printed out
+	 */
+	
+	 private void printBoard(int[][] board){
+		 for (int i=0, x=board.length; i<x; i++){
+			 for (int j=0,y=board[i].length; j<y; j++){
+				 System.out.print(Integer.toString(board[i][j])+",");
+			 }
+			 System.out.println("\t");
+		 }
+		 
+	 }
+	 /*
+	  * get the next generation board by calculating if cells are live on or die on 
+	  * basis of current conditions
+	  * @parameter board The current board field
+	  * return temp A newly created game temporary array
+	  */
+	 
+	 public int[][] getNextBoard(int[][] board){
+		 //if board does not have any values to return for the next generation
+		 if(board.length==0 || board[0].length==0)
+			 throw new IllegalArgumentException("Board must have a positive amount of rows and/or columns");
+		 
+		 int nRows=board.length;
+		 int nCols=board[0].length;
+		 //temporary board to store new values
+		 int [][] temp= new int[nRows][nCols];
+		 for (int row= 0; row<nRows; row++){
+			 for (int col=0; col<nCols; col++){
+				 temp[row][col]=getNewCellState(board[row][col],getLiveNeighbour(row,col,board));
+			 }
+		 }
+		 return temp;
+	 }
+	 /*
+	  * get the number of live neighbours of given cell position
+	  * @parameter cellRow column position of the cell
+	  * @parameter cellCol row position of the cell
+	  */
+	 private int getLiveNeighbour(int cellRow, int cellCol, int[][]board){
+		 int liveNeighbours=0;
+		 int rowEnd=Math.min(board.length, cellRow+2);
+		 int colEnd=Math.min(board[0].length, cellCol+2);
+		 
+		 for (int row=Math.max(0, cellRow-1); row<rowEnd; row++){
+			 for (int col=Math.max(0, cellCol-1); col<colEnd; col++){
+				 if((row!=cellRow || col!=cellCol) && board[row][col]== LIVE)
+					liveNeighbours++; 
+			 }
+		 }
+		 return liveNeighbours;
+	 }
+	 
+	 /*
+	  * Get the new state of the cell given the current state and
+      * the number of live neighbours of the cell.
+      * 
+      * @param curState          The current state of the cell, either DEAD or ALIVE
+      * @param liveNeighbours    The number of live neighbours of the given cell.
+      * 
+      * @return The new state of the cell given the number of live neighbours 
+      * and the current state
+	  */
+	 private int getNewCellState(int curState, int liveNeighbours){
+		 int newState= curState;
+		 switch (curState){
+		 case LIVE:
+			 //live cell with live neighbours less than 2 dies due to loneliness
+			 if(liveNeighbours<2)
+				 newState=DEAD;
+			 //live cell with live neighbours equals to 2 and 3 stays live
+			 if(liveNeighbours==2 || liveNeighbours==3)
+				 newState=LIVE;
+			 //live cell with live neighbours more than 3 dies due to crowdness
+			 if(liveNeighbours>3)
+				 newState=DEAD;
+			 break;
+		 case DEAD:
+			 //dead cell with exact 3 live neighbours becomes live by reproduction
+			 if(liveNeighbours==3)
+				 newState=LIVE;
+			 break;
+			 default:
+				 throw new IllegalArgumentException("State of cell must be either LIVE or DEAD");
+			 
+		 }
+		 return newState;
+	 }
+	 /*
+	  * get cell state either DEAD or LIVE at specific position from the last iteration
+	  * @parameter board The board of last iteration 
+	  */
+	 private void getCellState(int[][] board){
+			int k;
+			do{
+				Scanner sc= new Scanner (System.in);
+				System.out.println("************************************************************************");
+				System.out.println("Enter The Cell Position Which You Want To Check ");
+				
+				System.out.println("Enter Row Index(please be sure row index start from zero) ");
+				int r=sc.nextInt();
+				
+				System.out.println("Enter Column Index(please be sure column index start from zero)");
+				int c=sc.nextInt();
+				//inputs under the limit of board size
+				if(r<board.length && c<board[0].length){
+					int count=0;
+					for (int i=0; i<board.length; i++){
+						for (int j=0; j<board[i].length; j++){
+							if (board[r][c]==0)
+								count=0;
+							else
+								count=1;
+						}
+						
+					}
+					if (count==0)
+						System.out.println("=================Cell on this position is DEAD===================");
+					else
+						System.out.println("=================Cell on this position is ALIVE==================");
+				}
+				else
+					System.out.println("!!!Please Check and Enter Row or Column Index again!!!");
+				
+				
+				System.out.println("************************************************************************");
+				System.out.println("Want to check another cell press 1 else press 0");
+				k=sc.nextInt();
+				
+			}while(k!=0);
+			
+		}
+	
+
+}
